@@ -1,0 +1,22 @@
+perfect there are few things to do.
+
+first: the client doesn't need image for products so i watn you to remove it from database and all related things 
+
+- but create special tasks for revolutionaizign the shop portal to search and see the cards make the cards look so beautiflul and make the selector for my orders and main page the navbar on top make it on side or make it bigger or much more modern and beautiful 
+
+second: i will provide you with mongodb connoceiton convert the backend to use this mongod b and adjust alll things and make sure frontend ocnnection is workign adn sepcially the dashboard and all static numbers now to be fully working 
+here is mongodb connection : mongodb+srv://alislimaly_db_user:<db_password>@cluster0.tzqlsui.mongodb.net/?appName=Cluster0
+where <db_password> is JxJ.3mhmPx3WnLW
+
+
+third: the lient wants in the parts in admin dashborad instead of adding parts manually proivde him with import using excel sheet and also download template button in arabic 
+
+the exceh sheet will contain all data but only teh part number, name, price, and stock are required 
+
+all others are optional 
+
+note: be resilient and make all edge cases we want to help him to do this easily since he is not well diversed technically
+
+
+
+another important part is the i want you to see ifor such kind of business if there are things that might lep him you can search internaet and put it but dont add too technical stuff 
