@@ -1,0 +1,100 @@
+version: '3.8'
+
+# Alternative port configuration if 8080-8082 are taken
+# Uses ports: 9090, 9091, 9092
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bahr-backend
+    restart: unless-stopped
+    ports:
+      - "9090:3000"  # Alternative port
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/spare_parts
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - bahr-network
+
+  # Dashboard (Admin Panel)
+  dashboard:
+    build:
+      context: ./dashbaord
+      dockerfile: Dockerfile
+    container_name: bahr-dashboard
+    restart: unless-stopped
+    ports:
+      - "9091:80"  # Alternative port
+    environment:
+      - VITE_API_URL=https://api.bahr-alqeta3.store
+    networks:
+      - bahr-network
+
+  # Landing Page
+  landing:
+    build:
+      context: ./landing
+      dockerfile: Dockerfile
+    container_name: bahr-landing
+    restart: unless-stopped
+    ports:
+      - "9092:3000"  # Alternative port
+    environment:
+      - NEXT_PUBLIC_API_URL=https://api.bahr-alqeta3.store
+    networks:
+      - bahr-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: bahr-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"  # Alternative port to avoid conflict with existing postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=spare_parts
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - bahr-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: bahr-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Alternative port to avoid conflict with existing redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - bahr-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  bahr-network:
+    driver: bridge

@@ -1,0 +1,105 @@
+╔══════════════════════════════════════════════════════════════════╗
+║          SPACESHIP DNS SETUP - bahr-alqeta3.store                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📍 YOU ARE HERE: Spaceship DNS Management Panel
+
+🎯 GOAL: Add 4 A records pointing to your server
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Click "+ Add record" button (blue button, top right)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 2: Add these 4 records (one at a time):
+
+┌────────────────────────────────────────────────────────────────┐
+│ RECORD 1 - Main Domain                                         │
+├────────────────────────────────────────────────────────────────┤
+│ Type:    A                                                     │
+│ Name:    @                                                     │
+│ Value:   178.18.246.104                                        │
+│ TTL:     3600                                                  │
+└────────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────┐
+│ RECORD 2 - WWW Subdomain                                       │
+├────────────────────────────────────────────────────────────────┤
+│ Type:    A                                                     │
+│ Name:    www                                                   │
+│ Value:   178.18.246.104                                        │
+│ TTL:     3600                                                  │
+└────────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────┐
+│ RECORD 3 - Admin Dashboard                                     │
+├────────────────────────────────────────────────────────────────┤
+│ Type:    A                                                     │
+│ Name:    admin                                                 │
+│ Value:   178.18.246.104                                        │
+│ TTL:     3600                                                  │
+└────────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────┐
+│ RECORD 4 - API Backend                                         │
+├────────────────────────────────────────────────────────────────┤
+│ Type:    A                                                     │
+│ Name:    api                                                   │
+│ Value:   178.18.246.104                                        │
+│ TTL:     3600                                                  │
+└────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 3: Wait 5-10 minutes for DNS propagation
+
+⏱️  Grab a coffee! DNS changes take a few minutes to propagate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 4: Verify DNS is working
+
+Run this command from your computer:
+
+    nslookup bahr-alqeta3.store
+
+Expected result: 178.18.246.104
+
+Or check online: https://dnschecker.org/#A/bahr-alqeta3.store
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CHECKLIST:
+
+[ ] Added A record: @ → 178.18.246.104
+[ ] Added A record: www → 178.18.246.104
+[ ] Added A record: admin → 178.18.246.104
+[ ] Added A record: api → 178.18.246.104
+[ ] Waited 5-10 minutes
+[ ] Verified with nslookup or dnschecker.org
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 NEXT STEP: Once DNS is working, proceed with server deployment!
+
+See: DEPLOYMENT_CHECKLIST.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 TIPS:
+
+• The "@" symbol means "root domain" (bahr-alqeta3.store)
+• All 4 records point to the SAME IP: 178.18.246.104
+• TTL 3600 = 1 hour (how long DNS servers cache the record)
+• You can use "Auto" for TTL if 3600 is not available
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 NEED HELP?
+
+• Spaceship Support: support@spaceship.com
+• DNS Guide: See SPACESHIP_DNS_SETUP.md
+• Full Deployment: See DEPLOYMENT_GUIDE.md
+
+╚══════════════════════════════════════════════════════════════════╝
