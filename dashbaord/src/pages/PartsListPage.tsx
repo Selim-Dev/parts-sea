@@ -22,6 +22,9 @@ export default function PartsListPage() {
   const [activeBrand, setActiveBrand] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [confirmDeletePart, setConfirmDeletePart] = useState<Part | null>(null);
 
   const fetchParts = async () => {
     setLoading(true);
@@ -74,6 +77,39 @@ export default function PartsListPage() {
     setEditingPart(null);
     fetchParts();
     fetchFilters();
+  };
+
+  const handleDelete = async (part: Part) => {
+    setConfirmDeletePart(null);
+    setDeletingId(part.id);
+    try {
+      await client.delete(`/parts/${part.id}`);
+      showToast('تم حذف القطعة بنجاح', 'success');
+      fetchParts();
+      fetchFilters();
+    } catch {
+      showToast('حدث خطأ أثناء حذف القطعة', 'error');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleToggleActive = async (part: Part) => {
+    setTogglingId(part.id);
+    try {
+      await client.patch(`/parts/${part.id}/active`);
+      setParts((prev) =>
+        prev.map((p) => (p.id === part.id ? { ...p, isActive: !p.isActive } : p))
+      );
+      showToast(
+        part.isActive ? 'تم إيقاف تفعيل القطعة' : 'تم تفعيل القطعة',
+        'success'
+      );
+    } catch {
+      showToast('حدث خطأ أثناء تغيير حالة القطعة', 'error');
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const handleImportSuccess = () => {
@@ -270,6 +306,7 @@ export default function PartsListPage() {
                   <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-500">الماركة</th>
                   <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-500">السعر</th>
                   <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-500">المخزون</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-500">الحالة</th>
                   <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-500">إجراءات</th>
                 </tr>
               </thead>
@@ -277,7 +314,7 @@ export default function PartsListPage() {
                 {filteredParts.map((part) => (
                   <tr
                     key={part.id}
-                    className="border-b border-gray-100 even:bg-gray-50/50 transition-colors hover:bg-blue-50/40"
+                    className={`border-b border-gray-100 transition-colors hover:bg-blue-50/40 ${part.isActive === false ? 'opacity-60 bg-gray-50/80' : 'even:bg-gray-50/50'}`}
                   >
                     <td className="px-5 py-3.5 text-sm text-gray-700 font-mono">{part.partNumber}</td>
                     <td className="px-5 py-3.5">
@@ -331,13 +368,42 @@ export default function PartsListPage() {
                         )}
                       </span>
                     </td>
+                    {/* Active toggle */}
                     <td className="px-5 py-3.5">
                       <button
-                        onClick={() => handleEdit(part)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors cursor-pointer"
+                        onClick={() => handleToggleActive(part)}
+                        disabled={togglingId === part.id}
+                        dir="ltr"
+                        title={part.isActive === false ? 'تفعيل القطعة' : 'إيقاف تفعيل القطعة'}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                          part.isActive === false ? 'bg-gray-300' : 'bg-green-500'
+                        }`}
                       >
-                        تعديل
+                        <span
+                          className={`inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 ${
+                            part.isActive === false ? 'translate-x-0' : 'translate-x-5'
+                          }`}
+                        />
                       </button>
+                    </td>
+                    {/* Actions */}
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleEdit(part)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors cursor-pointer"
+                        >
+                          تعديل
+                        </button>
+                        <span className="text-gray-200">|</span>
+                        <button
+                          onClick={() => setConfirmDeletePart(part)}
+                          disabled={deletingId === part.id}
+                          className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deletingId === part.id ? '...' : 'حذف'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -346,6 +412,42 @@ export default function PartsListPage() {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      {confirmDeletePart && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">تأكيد الحذف</h3>
+                <p className="text-sm text-gray-500">هذا الإجراء لا يمكن التراجع عنه</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-700 mb-6 bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+              هل أنت متأكد من حذف القطعة <strong className="text-gray-900">{confirmDeletePart.name}</strong>؟
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDeletePart(null)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDeletePart)}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors cursor-pointer"
+              >
+                حذف نهائياً
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <PartFormModal
         show={showModal}

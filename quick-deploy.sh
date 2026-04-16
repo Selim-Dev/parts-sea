@@ -23,6 +23,7 @@ tar -czf bahr-deploy.tar.gz \
   docker-compose.production.yml \
   docker-compose.alternative-ports.yml \
   deploy-to-server.sh \
+  simple-deploy.sh \
   check-ports.sh \
   START_HERE.md \
   README_DEPLOYMENT.md \
@@ -31,6 +32,7 @@ tar -czf bahr-deploy.tar.gz \
   PORT_MANAGEMENT.md \
   SPACESHIP_DNS_SETUP.md \
   DNS_QUICK_GUIDE.txt \
+  COMMANDS.md \
   .env.production.example
 
 echo "✅ Package created: bahr-deploy.tar.gz"
@@ -55,7 +57,7 @@ echo "📂 Extracting files..."
 tar -xzf ~/bahr-deploy.tar.gz
 
 # Make scripts executable
-chmod +x deploy-to-server.sh check-ports.sh
+chmod +x deploy-to-server.sh simple-deploy.sh check-ports.sh
 
 # Check port availability
 echo ""
@@ -66,11 +68,13 @@ echo ""
 echo "✅ Files extracted to ~/bahr-alqeta3"
 echo ""
 echo "📋 Next steps:"
-echo "1. Configure DNS in Spaceship (see DEPLOYMENT_GUIDE.md)"
-echo "2. Run: bash deploy-to-server.sh"
-echo "3. Create .env file with your secrets"
-echo "4. Run: docker-compose -f docker-compose.production.yml up -d --build"
-echo "5. Setup SSL: certbot --nginx -d bahr-alqeta3.store -d www.bahr-alqeta3.store -d admin.bahr-alqeta3.store -d api.bahr-alqeta3.store --email YOUR_EMAIL --agree-tos"
+echo "1. Configure DNS in Spaceship (see DNS_QUICK_GUIDE.txt)"
+echo "2. Run: bash simple-deploy.sh"
+echo "3. Create .env file: cp .env.production.example .env && nano .env"
+echo "4. Start services: docker-compose -f docker-compose.production.yml up -d --build"
+echo "5. Setup SSL: sudo certbot --nginx -d bahr-alqeta3.store -d www.bahr-alqeta3.store -d admin.bahr-alqeta3.store -d api.bahr-alqeta3.store --email YOUR_EMAIL --agree-tos"
+echo ""
+echo "📖 Quick reference: cat COMMANDS.md"
 echo ""
 echo "Note: If ports 8080-8082 are in use, use docker-compose.alternative-ports.yml instead (ports 9090-9092)"
 ENDSSH

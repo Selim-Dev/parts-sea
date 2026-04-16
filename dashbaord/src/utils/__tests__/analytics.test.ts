@@ -55,6 +55,7 @@ const arbPart: fc.Arbitrary<Part> = fc.record({
   stock: fc.integer({ min: 0, max: 1_000 }),
   category: fc.string(),
   brand: fc.string(),
+  isActive: fc.boolean(),
   createdAt: arbISODate,
   updatedAt: arbISODate,
 });

@@ -11,9 +11,11 @@ async function bootstrap() {
     'http://localhost:3002', 
     'http://localhost:5173',
     'http://localhost:5174',
-    // Add your production frontend URLs here when deployed
-    // 'https://your-landing-page.onrender.com',
-    // 'https://your-dashboard.onrender.com',
+    // Production domains
+    'https://bahr-alqeta3.store',
+    'https://www.bahr-alqeta3.store',
+    'https://admin.bahr-alqeta3.store',
+    'https://api.bahr-alqeta3.store',
   ];
 
   app.enableCors({
@@ -24,6 +26,7 @@ async function bootstrap() {
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.log('CORS blocked origin:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     },

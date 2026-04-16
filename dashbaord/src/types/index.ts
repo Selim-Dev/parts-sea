@@ -1,4 +1,4 @@
-export type OrderStatus = 'pending' | 'approved' | 'preparing' | 'ready' | 'delivered';
+export type OrderStatus = 'pending' | 'approved' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
 
 export interface User {
   id: number;
@@ -25,6 +25,7 @@ export interface Part {
   stock: number;
   category: string;
   brand: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -63,7 +63,9 @@ export default function CatalogPage() {
   const [activeCategory, setActiveCategory] = useState('');
   const [activeBrand, setActiveBrand] = useState('');
 
-  const { items, addToCart } = useCart();
+  const { items, addToCart, updateQuantity } = useCart();
+  const cartTotal = items.reduce((sum, item) => sum + item.part.price * item.quantity, 0);
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   useEffect(() => {
@@ -147,7 +149,7 @@ export default function CatalogPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
+        <div className={`space-y-6 ${totalItems > 0 ? 'pb-24' : ''}`}>
           {/* Hero */}
           <div className="relative rounded-3xl overflow-hidden bg-slate-900 px-6 sm:px-10 py-12 sm:py-16">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0di00aDR2NGgtMnYtMmgtMnptMC0zMHY0aDR2LTRoLTJ2MmgtMnpNNiAzNHYtNGg0djRIOHYtMkg2ek02IDR2NEgxMFY0SDh2Mkg2eiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -356,7 +358,11 @@ export default function CatalogPage() {
                 return (
                   <div
                     key={part.id}
-                    className="group relative bg-white rounded-2xl border border-gray-200/60 overflow-hidden hover:shadow-2xl hover:shadow-slate-900/10 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                    className={`group relative bg-white rounded-2xl border overflow-hidden hover:shadow-2xl hover:shadow-slate-900/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer ${
+                      cartQty > 0
+                        ? 'border-emerald-300 shadow-md shadow-emerald-100 ring-1 ring-emerald-200'
+                        : 'border-gray-200/60 hover:border-slate-300'
+                    }`}
                     onClick={() => setSelectedPart(part)}
                   >
                     <CartIndicatorBadge quantity={cartQty} />
@@ -397,28 +403,49 @@ export default function CatalogPage() {
                         </span>
                       </div>
 
-                      {stockDisplay.color === 'amber' && part.stock > 0 && (
-                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 text-[11px] font-bold px-3 py-1.5 rounded-lg mb-3 text-center border border-amber-200/60">
-                          ⚠️ كمية محدودة
-                        </div>
-                      )}
-
-                      {part.stock === 0 && (
-                        <div className="bg-gray-50 text-gray-500 text-xs font-bold px-4 py-2.5 rounded-xl mb-3 text-center border border-gray-200">
+                      {part.stock === 0 ? (
+                        <div className="bg-gray-50 text-gray-400 text-xs font-bold px-4 py-3 rounded-xl text-center border border-gray-200">
                           نفذ المخزون
                         </div>
+                      ) : cartQty > 0 ? (
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-between mb-2.5">
+                            <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                              </svg>
+                              في السلة
+                            </span>
+                            <span className="text-xs font-bold text-slate-700">{(part.price * cartQty).toFixed(2)} ر.س</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => updateQuantity(part.id, cartQty - 1)}
+                              className="w-11 h-11 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-gray-600 text-lg font-bold transition-all cursor-pointer active:scale-95"
+                            >
+                              −
+                            </button>
+                            <span className="flex-1 text-center font-extrabold text-slate-900 text-lg tabular-nums">{cartQty}</span>
+                            <button
+                              onClick={() => updateQuantity(part.id, cartQty + 1)}
+                              disabled={cartQty >= part.stock}
+                              className="w-11 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 flex items-center justify-center text-white text-lg font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleAddToCart(part); }}
+                          className="w-full py-3 bg-slate-900 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 text-white text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.97]"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                          </svg>
+                          أضف للسلة
+                        </button>
                       )}
-
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleAddToCart(part); }}
-                        disabled={part.stock === 0}
-                        className="w-full py-3 bg-slate-900 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 text-white text-sm font-semibold rounded-xl transition-all duration-200 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2 active:scale-[0.97]"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        {part.stock === 0 ? 'نفذ المخزون' : 'أضف للسلة'}
-                      </button>
                     </div>
                   </div>
                 );
@@ -463,12 +490,43 @@ export default function CatalogPage() {
           )}
         </div>
 
+        {/* Sticky cart bar */}
+        {totalItems > 0 && (
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4 pointer-events-none">
+            <a
+              href="/cart"
+              className="pointer-events-auto flex items-center justify-between bg-slate-900 hover:bg-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-2xl shadow-slate-900/40 transition-all duration-200 active:scale-[0.98]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+                  </svg>
+                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[9px] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center px-0.5">
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                </div>
+                <span className="text-sm font-semibold">
+                  {totalItems} {totalItems === 1 ? 'قطعة' : 'قطع'} في السلة
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-emerald-400">{cartTotal.toFixed(2)} ر.س</span>
+                <svg className="w-4 h-4 text-gray-400 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </div>
+            </a>
+          </div>
+        )}
+
         <AddedToast show={toastVisible} />
         <QuickViewModal
           part={selectedPart}
           isOpen={selectedPart !== null}
           onClose={() => setSelectedPart(null)}
-          onAddToCart={(part) => { handleAddToCart(part); setSelectedPart(null); }}
+          onAddToCart={(part) => { handleAddToCart(part); }}
+          onUpdateQuantity={updateQuantity}
           cartQuantity={selectedPart ? getCartQuantityForPart(items, selectedPart.id) : 0}
         />
       </AppLayout>

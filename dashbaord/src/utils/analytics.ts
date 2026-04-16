@@ -1,4 +1,4 @@
-import type { Order, OrderItem, Part } from '../types/index';
+import type { Order, OrderItem, Part, OrderStatus } from '../types/index';
 
 export interface StatusBreakdown {
   pending: number;
@@ -6,11 +6,11 @@ export interface StatusBreakdown {
   preparing: number;
   ready: number;
   delivered: number;
+  cancelled: number;
 }
 
 /**
  * Compute total revenue from an array of orders.
- * Revenue = sum of (quantity × unitPrice) for every item across every order.
  */
 export function computeTotalRevenue(orders: Order[]): number {
   return orders.reduce(
@@ -29,11 +29,13 @@ export function computeStatusBreakdown(orders: Order[]): StatusBreakdown {
     preparing: 0,
     ready: 0,
     delivered: 0,
+    cancelled: 0,
   };
 
   for (const order of orders) {
-    if (order.status in breakdown) {
-      breakdown[order.status]++;
+    const s = order.status as OrderStatus;
+    if (s in breakdown) {
+      breakdown[s as keyof StatusBreakdown]++;
     }
   }
 
@@ -42,18 +44,16 @@ export function computeStatusBreakdown(orders: Order[]): StatusBreakdown {
 
 /**
  * Compute the total for a single order's items.
- * Total = sum of (quantity × unitPrice) for each item.
  */
 export function computeOrderTotal(items: OrderItem[]): number {
   return items.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
+    (sum, item) => sum + (item.quantity ?? 0) * (item.unitPrice ?? 0),
     0,
   );
 }
 
 /**
  * Filter parts with stock at or below the given threshold.
- * Default threshold is 5.
  */
 export function filterLowStockParts(parts: Part[], threshold: number = 5): Part[] {
   return parts.filter((part) => part.stock <= threshold);
@@ -61,14 +61,13 @@ export function filterLowStockParts(parts: Part[], threshold: number = 5): Part[
 
 /**
  * Return a time-of-day greeting in Arabic.
- * "صباح الخير" for morning (hour < 12), "مساء الخير" for afternoon/evening.
  */
 export function getGreeting(hour: number): string {
   return hour < 12 ? 'صباح الخير' : 'مساء الخير';
 }
 
 /**
- * Filter orders where orderNumber or user.shopName contains the search text (case-insensitive).
+ * Filter orders where orderNumber or user.shopName contains the search text.
  */
 export function filterOrdersBySearch(orders: Order[], searchText: string): Order[] {
   if (!searchText.trim()) {

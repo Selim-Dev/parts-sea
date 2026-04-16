@@ -14,10 +14,11 @@ for i in "${!PORTS[@]}"; do
     PORT=${PORTS[$i]}
     NAME=${PORT_NAMES[$i]}
     
-    if netstat -tuln | grep -q ":$PORT "; then
+    # Use ss instead of netstat (more modern and usually pre-installed)
+    if ss -tuln 2>/dev/null | grep -q ":$PORT "; then
         echo "❌ Port $PORT ($NAME) is IN USE"
         echo "   Process using it:"
-        netstat -tulpn | grep ":$PORT " | head -1
+        ss -tulpn 2>/dev/null | grep ":$PORT " | head -1 || echo "   (Run as root to see process details)"
         ALL_CLEAR=false
     else
         echo "✅ Port $PORT ($NAME) is available"
@@ -33,7 +34,7 @@ else
     echo "⚠️  Some ports are in use. Options:"
     echo ""
     echo "1. Stop the conflicting services:"
-    echo "   - Find process: netstat -tulpn | grep :<PORT>"
+    echo "   - Find process: ss -tulpn | grep :<PORT>"
     echo "   - Stop it: kill -9 <PID>"
     echo "   - Or if it's PM2: pm2 stop <app-name>"
     echo ""

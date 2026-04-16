@@ -14,6 +14,7 @@ const statusLabels: Record<OrderStatus, string> = {
   preparing: 'قيد التحضير',
   ready: 'جاهز',
   delivered: 'تم التسليم',
+  cancelled: 'ملغي',
 };
 
 const statusColors: Record<OrderStatus, string> = {
@@ -22,6 +23,7 @@ const statusColors: Record<OrderStatus, string> = {
   preparing: 'bg-violet-50 text-violet-700 border-violet-200/80',
   ready: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
   delivered: 'bg-gray-50 text-gray-500 border-gray-200/80',
+  cancelled: 'bg-red-50 text-red-600 border-red-200/80',
 };
 
 const statusDots: Record<OrderStatus, string> = {
@@ -30,9 +32,10 @@ const statusDots: Record<OrderStatus, string> = {
   preparing: 'bg-violet-500',
   ready: 'bg-emerald-500',
   delivered: 'bg-gray-400',
+  cancelled: 'bg-red-400',
 };
 
-const allStatuses: (OrderStatus | 'all')[] = ['all', 'pending', 'approved', 'preparing', 'ready', 'delivered'];
+const allStatuses: (OrderStatus | 'all')[] = ['all', 'pending', 'approved', 'preparing', 'ready', 'delivered', 'cancelled'];
 
 function formatArabicDate(dateStr: string): string {
   const date = new Date(dateStr);

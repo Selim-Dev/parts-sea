@@ -179,28 +179,27 @@ export default function ShopsListPage() {
                     </td>
                     <td className="px-5 py-3.5 text-sm text-gray-500">{formatDate(shop.createdAt)}</td>
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => handleToggle(shop)}
+                          disabled={toggling === shop.id}
+                          dir="ltr"
+                          title={shop.isActive ? 'إيقاف تفعيل المتجر' : 'تفعيل المتجر'}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                            shop.isActive ? 'bg-green-500' : 'bg-gray-300'
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 ${
+                              shop.isActive ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
                         <button
                           onClick={() => handleEdit(shop)}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors cursor-pointer"
                         >
                           تعديل
-                        </button>
-                        <span className="text-gray-300">|</span>
-                        <button
-                          onClick={() => handleToggle(shop)}
-                          disabled={toggling === shop.id}
-                          className={`text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 ${
-                            shop.isActive
-                              ? 'text-amber-600 hover:text-amber-800'
-                              : 'text-green-600 hover:text-green-800'
-                          }`}
-                        >
-                          {toggling === shop.id
-                            ? '...'
-                            : shop.isActive
-                              ? 'تعطيل'
-                              : 'تفعيل'}
                         </button>
                       </div>
                     </td>

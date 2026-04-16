@@ -8,7 +8,7 @@ export interface StockDisplay {
 /**
  * Return the cart quantity for a given part, or 0 if not in cart.
  */
-export function getCartQuantityForPart(items: CartItem[], partId: number): number {
+export function getCartQuantityForPart(items: CartItem[], partId: string): number {
   const item = items.find((i) => i.part.id === partId);
   return item ? item.quantity : 0;
 }

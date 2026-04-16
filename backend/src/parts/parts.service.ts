@@ -25,7 +25,7 @@ export class PartsService {
   ): Promise<{ data: Part[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
 
-    const filter: Record<string, any> = {};
+    const filter: Record<string, any> = { isActive: { $ne: false } };
 
     if (category) {
       filter.category = category;
@@ -52,8 +52,8 @@ export class PartsService {
   async getDistinctCategories(): Promise<string[]> {
     const categories = await this.partModel
       .distinct('category')
-      .where('category')
-      .ne('')
+      .where('category').ne('')
+      .where('isActive').ne(false)
       .exec();
     return (categories as string[]).sort();
   }
@@ -61,8 +61,8 @@ export class PartsService {
   async getDistinctBrands(): Promise<string[]> {
     const brands = await this.partModel
       .distinct('brand')
-      .where('brand')
-      .ne('')
+      .where('brand').ne('')
+      .where('isActive').ne(false)
       .exec();
     return (brands as string[]).sort();
   }
@@ -92,6 +92,22 @@ export class PartsService {
       throw new NotFoundException('العنصر المطلوب غير موجود');
     }
     Object.assign(part, dto);
+    return part.save();
+  }
+
+  async delete(id: string): Promise<void> {
+    const result = await this.partModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new NotFoundException('العنصر المطلوب غير موجود');
+    }
+  }
+
+  async toggleActive(id: string): Promise<Part> {
+    const part = await this.partModel.findById(id).exec();
+    if (!part) {
+      throw new NotFoundException('العنصر المطلوب غير موجود');
+    }
+    part.isActive = !part.isActive;
     return part.save();
   }
 }

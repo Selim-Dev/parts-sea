@@ -118,6 +118,18 @@ export class OrdersService {
     return order.save();
   }
 
+  async cancelOrder(id: string): Promise<Order> {
+    const order = await this.orderModel.findById(id).exec();
+    if (!order) {
+      throw new NotFoundException('الطلب غير موجود');
+    }
+    if (!['pending', 'approved'].includes(order.status)) {
+      throw new BadRequestException('لا يمكن إلغاء الطلب في هذه المرحلة');
+    }
+    order.status = 'cancelled';
+    return order.save();
+  }
+
   private async generateOrderNumber(): Promise<string> {
     const now = new Date();
     const yyyy = now.getFullYear();

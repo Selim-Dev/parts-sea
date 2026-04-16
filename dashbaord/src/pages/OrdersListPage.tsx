@@ -15,6 +15,7 @@ const statusFilters: { label: string; value: OrderStatus | 'all' }[] = [
   { label: 'قيد التحضير', value: 'preparing' },
   { label: 'جاهز', value: 'ready' },
   { label: 'تم التسليم', value: 'delivered' },
+  { label: 'ملغي', value: 'cancelled' },
 ];
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
@@ -23,6 +24,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   preparing: 'bg-indigo-100 text-indigo-800',
   ready: 'bg-green-100 text-green-800',
   delivered: 'bg-gray-100 text-gray-600',
+  cancelled: 'bg-red-100 text-red-700',
 };
 
 export default function OrdersListPage() {
@@ -93,19 +95,30 @@ export default function OrdersListPage() {
 
       {/* Status filter tabs */}
       <div className="mb-4 flex flex-wrap gap-2">
-        {statusFilters.map((filter) => (
-          <button
-            key={filter.value}
-            onClick={() => setActiveFilter(filter.value)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
-              activeFilter === filter.value
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
+        {statusFilters.map((filter) => {
+          const count = filter.value === 'all'
+            ? orders.length
+            : (breakdown[filter.value as OrderStatus] ?? 0);
+          if (filter.value !== 'all' && count === 0) return null;
+          return (
+            <button
+              key={filter.value}
+              onClick={() => setActiveFilter(filter.value)}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                activeFilter === filter.value
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              {filter.label}
+              <span className={`text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 ${
+                activeFilter === filter.value ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
+              }`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Search input */}
@@ -149,6 +162,7 @@ export default function OrdersListPage() {
                   <th className="px-5 py-3.5 text-xs font-semibold uppercase text-gray-500">القطع</th>
                   <th className="px-5 py-3.5 text-xs font-semibold uppercase text-gray-500">الحالة</th>
                   <th className="px-5 py-3.5 text-xs font-semibold uppercase text-gray-500">الإجمالي</th>
+                  <th className="px-3 py-3.5" />
                 </tr>
               </thead>
               <tbody>
@@ -156,13 +170,13 @@ export default function OrdersListPage() {
                   <tr
                     key={order.id}
                     onClick={() => navigate(`/orders/${order.id}`)}
-                    className="cursor-pointer border-b border-gray-50 transition-colors even:bg-gray-50/50 hover:bg-blue-50/40"
+                    className="group cursor-pointer border-b border-gray-50 transition-colors even:bg-gray-50/50 hover:bg-blue-50/40"
                   >
-                    <td className="px-5 py-3.5 font-medium text-gray-800">{order.orderNumber}</td>
-                    <td className="px-5 py-3.5 text-gray-600">
+                    <td className="px-5 py-3.5 font-semibold text-gray-800">{order.orderNumber}</td>
+                    <td className="px-5 py-3.5 text-gray-600 text-sm">
                       {order.user?.shopName || order.user?.username || '—'}
                     </td>
-                    <td className="px-5 py-3.5 text-gray-600 text-sm">{formatDate(order.createdAt)}</td>
+                    <td className="px-5 py-3.5 text-gray-500 text-sm">{formatDate(order.createdAt)}</td>
                     <td className="px-5 py-3.5">
                       <span className="inline-block px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
                         {(order.items ?? []).length} قطعة
@@ -171,8 +185,13 @@ export default function OrdersListPage() {
                     <td className="px-5 py-3.5">
                       <StatusBadge status={order.status} />
                     </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">
+                    <td className="px-5 py-3.5 font-semibold text-gray-800">
                       {computeOrderTotal(order.items ?? []).toFixed(2)} ر.س
+                    </td>
+                    <td className="px-3 py-3.5 text-gray-300 group-hover:text-gray-500 transition-colors">
+                      <svg className="w-4 h-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
                     </td>
                   </tr>
                 ))}

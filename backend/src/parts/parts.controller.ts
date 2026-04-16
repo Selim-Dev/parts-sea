@@ -3,6 +3,8 @@ import {
   Get,
   Post,
   Put,
+  Patch,
+  Delete,
   Param,
   Body,
   Query,
@@ -82,6 +84,19 @@ export class PartsController {
     @Body() updatePartDto: UpdatePartDto,
   ) {
     return this.partsService.update(id, updatePartDto);
+  }
+
+  @Patch(':id/active')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  toggleActive(@Param('id') id: string) {
+    return this.partsService.toggleActive(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  delete(@Param('id') id: string) {
+    return this.partsService.delete(id);
   }
 
   @Post('import')

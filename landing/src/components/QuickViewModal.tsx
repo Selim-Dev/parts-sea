@@ -9,6 +9,7 @@ interface QuickViewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddToCart: (part: Part) => void;
+  onUpdateQuantity?: (partId: string, quantity: number) => void;
   cartQuantity: number;
 }
 
@@ -17,6 +18,7 @@ export default function QuickViewModal({
   isOpen,
   onClose,
   onAddToCart,
+  onUpdateQuantity,
   cartQuantity,
 }: QuickViewModalProps) {
   useEffect(() => {
@@ -83,31 +85,55 @@ export default function QuickViewModal({
             <p className="text-sm text-gray-500 leading-relaxed">{part.description}</p>
           )}
 
-          {cartQuantity > 0 && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 text-sm text-slate-600">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-              <span>في السلة: <strong className="text-slate-900">{cartQuantity}</strong></span>
+          {outOfStock ? (
+            <div className="w-full py-3.5 bg-gray-100 text-gray-400 text-sm font-semibold rounded-2xl text-center">
+              نفذ المخزون
             </div>
+          ) : cartQuantity > 0 && onUpdateQuantity ? (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-emerald-600 font-semibold flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  في السلة
+                </span>
+                <span className="text-sm font-bold text-slate-700">{(part.price * cartQuantity).toFixed(2)} ر.س</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => onUpdateQuantity(part.id, cartQuantity - 1)}
+                  className="w-12 h-12 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-gray-600 text-xl font-bold transition-all cursor-pointer active:scale-95"
+                >
+                  −
+                </button>
+                <span className="flex-1 text-center font-extrabold text-slate-900 text-2xl tabular-nums">{cartQuantity}</span>
+                <button
+                  onClick={() => onUpdateQuantity(part.id, cartQuantity + 1)}
+                  disabled={cartQuantity >= part.stock}
+                  className="w-12 h-12 rounded-xl bg-slate-900 hover:bg-slate-800 flex items-center justify-center text-white text-xl font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  +
+                </button>
+              </div>
+              <button
+                onClick={onClose}
+                className="mt-3 w-full py-3 border border-gray-200 text-gray-600 text-sm font-medium rounded-2xl hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                متابعة التسوق
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => onAddToCart(part)}
+              className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98]"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              أضف للسلة
+            </button>
           )}
-
-          <button
-            onClick={() => onAddToCart(part)}
-            disabled={outOfStock}
-            className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-2xl transition-all duration-200 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98]"
-          >
-            {outOfStock ? (
-              'نفذ المخزون'
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                أضف للسلة
-              </>
-            )}
-          </button>
         </div>
       </div>
     </div>

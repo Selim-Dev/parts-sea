@@ -1,14 +1,14 @@
-export type OrderStatus = 'pending' | 'approved' | 'preparing' | 'ready' | 'delivered';
+export type OrderStatus = 'pending' | 'approved' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
 
 export interface User {
-  id: number;
+  id: string;
   username: string;
   role: 'shop' | 'admin';
   shopName?: string;
 }
 
 export interface Part {
-  id: number;
+  id: string;
   partNumber: string;
   name: string;
   price: number;
@@ -19,9 +19,9 @@ export interface Part {
 }
 
 export interface OrderItem {
-  id: number;
-  orderId: number;
-  partId: number;
+  id: string;
+  orderId: string;
+  partId: string;
   partNumber: string;
   partName: string;
   unitPrice: number;
@@ -29,9 +29,9 @@ export interface OrderItem {
 }
 
 export interface Order {
-  id: number;
+  id: string;
   orderNumber: string;
-  userId: number;
+  userId: string;
   status: OrderStatus;
   createdAt: string;
   updatedAt: string;

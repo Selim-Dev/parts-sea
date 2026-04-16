@@ -25,7 +25,7 @@ export default function CartPage() {
 
     setSubmitting(true);
     try {
-      const payload = { items: items.map((item) => ({ partId: item.part.id, quantity: item.quantity })) };
+      const payload = { items: items.map((item) => ({ partId: String(item.part.id), quantity: item.quantity })) };
       const { data } = await api.post('/orders', payload);
       clearCart();
       setSuccessMessage(`تم إرسال الطلب بنجاح — رقم الطلب: ${data.orderNumber}`);
@@ -124,12 +124,12 @@ export default function CartPage() {
                         <div className="flex items-center gap-0 bg-gray-50 rounded-xl border border-gray-200/80">
                           <button
                             onClick={() => updateQuantity(item.part.id, item.quantity - 1)}
-                            className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-r-xl transition-colors cursor-pointer text-lg font-semibold"
+                            className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-r-xl transition-colors cursor-pointer text-xl font-semibold active:scale-95"
                           >−</button>
-                          <span className="w-12 text-center font-bold text-gray-900 text-sm">{item.quantity}</span>
+                          <span className="w-14 text-center font-bold text-gray-900 text-base tabular-nums">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.part.id, item.quantity + 1)}
-                            className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-l-xl transition-colors cursor-pointer text-lg font-semibold"
+                            className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-slate-900 hover:bg-gray-100 rounded-l-xl transition-colors cursor-pointer text-xl font-semibold active:scale-95"
                           >+</button>
                         </div>
 

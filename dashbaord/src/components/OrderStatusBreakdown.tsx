@@ -11,9 +11,10 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bg: stri
   preparing: { label: 'قيد التحضير', color: 'bg-indigo-500', bg: 'bg-indigo-50 text-indigo-800' },
   ready: { label: 'جاهز', color: 'bg-green-500', bg: 'bg-green-50 text-green-800' },
   delivered: { label: 'تم التسليم', color: 'bg-gray-500', bg: 'bg-gray-50 text-gray-800' },
+  cancelled: { label: 'ملغي', color: 'bg-red-500', bg: 'bg-red-50 text-red-800' },
 };
 
-const statusOrder: OrderStatus[] = ['pending', 'approved', 'preparing', 'ready', 'delivered'];
+const statusOrder: OrderStatus[] = ['pending', 'approved', 'preparing', 'ready', 'delivered', 'cancelled'];
 
 export default function OrderStatusBreakdown({ orders }: OrderStatusBreakdownProps) {
   const breakdown = computeStatusBreakdown(orders);

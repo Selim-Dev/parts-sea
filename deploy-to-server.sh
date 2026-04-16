@@ -10,8 +10,8 @@ echo "🚀 Starting deployment for bahr-alqeta3.store..."
 # Install certbot if not installed
 if ! command -v certbot &> /dev/null; then
     echo "📦 Installing certbot..."
-    apt update
-    apt install certbot python3-certbot-nginx -y
+    sudo apt update
+    sudo apt install certbot python3-certbot-nginx -y
 fi
 
 # Create nginx config for Landing Page (main domain)

@@ -51,4 +51,10 @@ export class OrdersController {
   updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
     return this.ordersService.updateStatus(id, dto.status);
   }
+
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  cancelOrder(@Param('id') id: string) {
+    return this.ordersService.cancelOrder(id);
+  }
 }

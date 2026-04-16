@@ -21,8 +21,26 @@ export class OrderItem {
 
 const OrderItemSchema = SchemaFactory.createForClass(OrderItem);
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform: (_doc, ret: any) => {
+      ret.id = ret._id.toString();
+      delete ret._id;
+      delete ret.__v;
+      // When userId is populated, expose it as "user" for the frontend
+      if (ret.userId && typeof ret.userId === 'object') {
+        ret.user = ret.userId;
+        delete ret.userId;
+      }
+      return ret;
+    },
+  },
+})
 export class Order extends Document {
+  id?: string; // Virtual property added by toJSON transform
+
   @Prop({ required: true, unique: true })
   orderNumber: string;
 
@@ -31,7 +49,7 @@ export class Order extends Document {
 
   @Prop({
     required: true,
-    enum: ['pending', 'approved', 'preparing', 'ready', 'delivered'],
+    enum: ['pending', 'approved', 'preparing', 'ready', 'delivered', 'cancelled'],
     default: 'pending',
   })
   status: string;

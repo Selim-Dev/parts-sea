@@ -10,12 +10,14 @@ import { formatStockDisplay, getCartQuantityForPart } from '../catalog';
 const arbPart = (overrides?: Partial<Part>): fc.Arbitrary<Part> =>
   fc
     .record({
-      id: fc.integer({ min: 1, max: 100_000 }),
+      id: fc.string({ minLength: 24, maxLength: 24 }), // MongoDB ObjectId format (24 hex chars)
       partNumber: fc.string({ minLength: 1, maxLength: 20 }),
       name: fc.string({ minLength: 1, maxLength: 50 }),
       price: fc.float({ min: Math.fround(0.01), max: Math.fround(10_000), noNaN: true }),
       description: fc.string({ minLength: 0, maxLength: 100 }),
       stock: fc.integer({ min: 0, max: 10_000 }),
+      category: fc.string({ minLength: 0, maxLength: 50 }),
+      brand: fc.string({ minLength: 0, maxLength: 50 }),
     })
     .map((p) => ({ ...p, ...overrides }));
 
@@ -30,7 +32,7 @@ const arbCartItem: fc.Arbitrary<CartItem> = fc
 const arbCartItems: fc.Arbitrary<CartItem[]> = fc
   .array(arbCartItem, { minLength: 0, maxLength: 20 })
   .map((items) => {
-    const seen = new Set<number>();
+    const seen = new Set<string>();
     return items.filter((item) => {
       if (seen.has(item.part.id)) return false;
       seen.add(item.part.id);
@@ -62,7 +64,7 @@ describe('Property 8: Cart quantity lookup returns correct quantity', () => {
     fc.assert(
       fc.property(
         arbCartItems,
-        fc.integer({ min: -1_000_000, max: -1 }), // negative IDs guaranteed not in cart
+        fc.string({ minLength: 24, maxLength: 24 }), // MongoDB ObjectId that won't match
         (items, missingId) => {
           const result = getCartQuantityForPart(items, missingId);
           expect(result).toBe(0);
@@ -76,7 +78,7 @@ describe('Property 8: Cart quantity lookup returns correct quantity', () => {
     fc.assert(
       fc.property(
         arbCartItems,
-        fc.integer({ min: 1, max: 100_000 }),
+        fc.string({ minLength: 24, maxLength: 24 }),
         (items, partId) => {
           const result = getCartQuantityForPart(items, partId);
           expect(result).toBeGreaterThanOrEqual(0);

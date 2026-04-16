@@ -13,6 +13,7 @@ const statusLabels: Record<OrderStatus, string> = {
   preparing: 'قيد التحضير',
   ready: 'جاهز',
   delivered: 'تم التسليم',
+  cancelled: 'ملغي',
 };
 
 const statusColors: Record<OrderStatus, string> = {
@@ -21,6 +22,7 @@ const statusColors: Record<OrderStatus, string> = {
   preparing: 'bg-indigo-100 text-indigo-800 border-indigo-200',
   ready: 'bg-emerald-100 text-emerald-800 border-emerald-200',
   delivered: 'bg-gray-100 text-gray-600 border-gray-200',
+  cancelled: 'bg-red-100 text-red-700 border-red-200',
 };
 
 const statusSteps: OrderStatus[] = ['pending', 'approved', 'preparing', 'ready', 'delivered'];

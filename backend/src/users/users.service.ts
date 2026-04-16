@@ -27,7 +27,7 @@ export class UsersService {
       .sort({ createdAt: -1 })
       .exec();
     return users.map((user) => {
-      const { passwordHash, ...rest } = user.toObject();
+      const { passwordHash, ...rest } = user.toJSON();
       return rest;
     });
   }
@@ -48,7 +48,7 @@ export class UsersService {
     });
 
     const saved = await user.save();
-    const { passwordHash, ...result } = saved.toObject();
+    const { passwordHash, ...result } = saved.toJSON();
     return result;
   }
 
@@ -69,7 +69,7 @@ export class UsersService {
     }
 
     const saved = await user.save();
-    const { passwordHash, ...result } = saved.toObject();
+    const { passwordHash, ...result } = saved.toJSON();
     return result;
   }
 
@@ -81,7 +81,7 @@ export class UsersService {
 
     user.isActive = !user.isActive;
     const saved = await user.save();
-    const { passwordHash, ...result } = saved.toObject();
+    const { passwordHash, ...result } = saved.toJSON();
     return result;
   }
 }
