@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionExpired = searchParams.get('session') === 'expired';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -90,6 +92,15 @@ export default function LoginPage() {
               <h1 className="text-2xl font-bold text-white mb-2">مرحباً بك</h1>
               <p className="text-sm text-blue-200/60">سجّل دخولك للمتابعة</p>
             </div>
+
+            {sessionExpired && !error && (
+              <div className="mb-6 rounded-xl bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm text-amber-300 px-4 py-3 text-sm text-center flex items-center justify-center gap-2">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 rounded-xl bg-red-500/10 border border-red-500/20 backdrop-blur-sm text-red-300 px-4 py-3 text-sm text-center flex items-center justify-center gap-2">

@@ -1,7 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-// OrderItem will be defined as a subdocument schema
+// OrderItem is an embedded subdocument of Order.
+// The @Schema() decorator is required so NestJS registers the @Prop metadata
+// with Mongoose — without it, SchemaFactory produces an empty schema and
+// items persist with only `_id`.
+@Schema({
+  _id: true,
+  toJSON: {
+    virtuals: true,
+    transform: (_doc, ret: any) => {
+      if (ret._id) {
+        ret.id = ret._id.toString();
+        delete ret._id;
+      }
+      delete ret.__v;
+      return ret;
+    },
+  },
+})
 export class OrderItem {
   @Prop({ required: true })
   partNumber: string;
@@ -19,7 +36,7 @@ export class OrderItem {
   partId?: string;
 }
 
-const OrderItemSchema = SchemaFactory.createForClass(OrderItem);
+export const OrderItemSchema = SchemaFactory.createForClass(OrderItem);
 
 @Schema({
   timestamps: true,

@@ -115,7 +115,10 @@ export default function OrderDetailPage() {
   const isDelivered = order.status === 'delivered';
   const canCancel = ['pending', 'approved'].includes(order.status);
   const currentStepIdx = STATUS_STEPS.findIndex(s => s.status === order.status);
-  const orderTotal = (order.items ?? []).reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const orderTotal = (order.items ?? []).reduce(
+    (sum, item) => sum + (item.quantity ?? 0) * (item.unitPrice ?? 0),
+    0,
+  );
 
   return (
     <div className="space-y-5">
@@ -303,10 +306,10 @@ export default function OrderDetailPage() {
             <tbody>
               {(order.items ?? []).map((item, idx) => (
                 <tr key={item.id ?? idx} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
-                  <td className="px-5 py-3.5 font-mono text-sm text-gray-700">{item.partNumber}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-700 font-medium">{item.partName}</td>
+                  <td className="px-5 py-3.5 font-mono text-sm text-gray-700">{item.partNumber ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-sm text-gray-700 font-medium">{item.partName ?? '—'}</td>
                   <td className="px-5 py-3.5 text-sm text-gray-600">
-                    <span className="inline-block px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 font-semibold text-xs">{item.quantity}</span>
+                    <span className="inline-block px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 font-semibold text-xs">{item.quantity ?? 0}</span>
                   </td>
                   <td className="px-5 py-3.5 text-sm text-gray-600">{(item.unitPrice ?? 0).toFixed(2)} ر.س</td>
                   <td className="px-5 py-3.5 text-sm font-semibold text-gray-800">{((item.quantity ?? 0) * (item.unitPrice ?? 0)).toFixed(2)} ر.س</td>

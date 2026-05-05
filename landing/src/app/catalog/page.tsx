@@ -1,18 +1,23 @@
 'use client';
 
+import { Search, Sparkles, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import api from '@/lib/api';
 
 import AppLayout from '@/components/AppLayout';
-import CartIndicatorBadge from '@/components/CartIndicatorBadge';
+import PartsCardGrid from '@/components/PartsCardGrid';
+import PartsTable, { PartsTableSkeleton } from '@/components/PartsTable';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import QuickViewModal from '@/components/QuickViewModal';
+import ViewModeToggle, { type CatalogView } from '@/components/ViewModeToggle';
 
 import { useCart } from '@/context/CartContext';
-import { formatStockDisplay, getCartQuantityForPart } from '@/utils/catalog';
+import { getCartQuantityForPart } from '@/utils/catalog';
 
 import type { Part } from '@/types/index';
+
+const VIEW_STORAGE_KEY = 'catalog_view';
 
 const LIMIT = 12;
 
@@ -62,6 +67,20 @@ export default function CatalogPage() {
   const [brands, setBrands] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState('');
   const [activeBrand, setActiveBrand] = useState('');
+  const [view, setView] = useState<CatalogView>('table');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem(VIEW_STORAGE_KEY);
+    if (stored === 'table' || stored === 'cards') setView(stored);
+  }, []);
+
+  const handleViewChange = useCallback((next: CatalogView) => {
+    setView(next);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(VIEW_STORAGE_KEY, next);
+    }
+  }, []);
 
   const { items, addToCart, updateQuantity } = useCart();
   const cartTotal = items.reduce((sum, item) => sum + item.part.price * item.quantity, 0);
@@ -150,49 +169,52 @@ export default function CatalogPage() {
     <ProtectedRoute>
       <AppLayout>
         <div className={`space-y-6 ${totalItems > 0 ? 'pb-24' : ''}`}>
-          {/* Hero */}
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900 px-6 sm:px-10 py-12 sm:py-16">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0di00aDR2NGgtMnYtMmgtMnptMC0zMHY0aDR2LTRoLTJ2MmgtMnpNNiAzNHYtNGg0djRIOHYtMkg2ek02IDR2NEgxMFY0SDh2Mkg2eiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-blue-600/20 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-indigo-600/15 to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
+          {/* Compact command bar */}
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 px-5 sm:px-7 py-5 sm:py-6 shadow-xl shadow-slate-900/15">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-1/3 w-[420px] h-[420px] bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-transparent rounded-full blur-3xl -translate-y-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[280px] h-[280px] bg-gradient-to-tl from-indigo-500/10 to-transparent rounded-full blur-3xl translate-y-1/2 translate-x-1/4 pointer-events-none" />
 
-            <div className="relative z-10 max-w-2xl">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight">
-                اعثر على القطعة <span className="text-blue-400">المناسبة</span>
-              </h1>
-              <p className="text-slate-300 text-sm sm:text-base mb-8">
-                ابحث في كتالوج قطع الغيار برقم القطعة أو الاسم أو الماركة
-              </p>
-              <div className="relative">
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                  </svg>
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-7">
+              <div className="lg:flex-shrink-0 lg:max-w-[300px]">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm text-blue-300 text-[10px] font-bold uppercase tracking-[0.12em] mb-2 border border-white/10">
+                  <Sparkles className="w-3 h-3" strokeWidth={2.5} />
+                  كتالوج القطع
+                </span>
+                <h1 className="text-xl sm:text-2xl font-bold text-white leading-snug">
+                  اعثر على القطعة{' '}
+                  <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                    المناسبة
+                  </span>
+                </h1>
+              </div>
+
+              <div className="lg:flex-1 relative">
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                  <Search className="w-5 h-5 text-slate-400" strokeWidth={2.2} />
                 </div>
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="ابحث برقم القطعة أو الاسم أو الماركة..."
-                  className="w-full pr-12 pl-12 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 text-white placeholder-slate-400 focus:outline-none focus:bg-white/15 focus:border-white/20 focus:ring-2 focus:ring-blue-500/30 text-base transition-all duration-200"
+                  placeholder="ابحث برقم القطعة، الاسم، أو الماركة..."
+                  className="w-full pr-12 pl-12 py-3.5 rounded-2xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/30 text-sm sm:text-base font-medium shadow-2xl shadow-black/30 border-0 transition-all duration-200"
                 />
-                {search && (
+                {search && !loading && (
                   <button
                     onClick={() => setSearch('')}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-all cursor-pointer"
+                    aria-label="مسح البحث"
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </button>
                 )}
+                {search && loading && (
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin" />
+                  </div>
+                )}
               </div>
-              {loading && search && (
-                <div className="mt-3 flex items-center gap-2 text-sm text-slate-300">
-                  <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-                  جاري البحث...
-                </div>
-              )}
             </div>
           </div>
 
@@ -247,19 +269,28 @@ export default function CatalogPage() {
                 )}
               </button>
               {!loading && (
-                <span className="text-sm text-gray-500 font-medium">{total} نتيجة</span>
+                <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 font-semibold bg-white border border-gray-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="tabular-nums" style={{ direction: 'ltr', unicodeBidi: 'isolate' }}>{total}</span>
+                  <span>نتيجة</span>
+                </span>
               )}
             </div>
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-5 py-3 rounded-xl bg-white border border-gray-200/80 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-gray-300 cursor-pointer hover:shadow-md transition-all"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2.5">
+              <ViewModeToggle view={view} onChange={handleViewChange} />
+              {view === 'cards' && (
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-5 py-3 rounded-xl bg-white border border-gray-200/80 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-gray-300 cursor-pointer hover:shadow-md transition-all"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              )}
+            </div>
           </div>
 
           {/* Active filter chips */}
@@ -324,7 +355,8 @@ export default function CatalogPage() {
           )}
 
           {/* Loading */}
-          {loading && (
+          {loading && view === 'table' && <PartsTableSkeleton />}
+          {loading && view === 'cards' && (
             <div className="flex items-center justify-center py-24">
               <div className="flex flex-col items-center gap-4">
                 <div className="relative w-12 h-12">
@@ -349,108 +381,25 @@ export default function CatalogPage() {
             </div>
           )}
 
-          {/* Product grid */}
+          {/* Parts list */}
           {!loading && filteredParts.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filteredParts.map((part) => {
-                const cartQty = getCartQuantityForPart(items, part.id);
-                const stockDisplay = formatStockDisplay(part.stock);
-                return (
-                  <div
-                    key={part.id}
-                    className={`group relative bg-white rounded-2xl border overflow-hidden hover:shadow-2xl hover:shadow-slate-900/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer ${
-                      cartQty > 0
-                        ? 'border-emerald-300 shadow-md shadow-emerald-100 ring-1 ring-emerald-200'
-                        : 'border-gray-200/60 hover:border-slate-300'
-                    }`}
-                    onClick={() => setSelectedPart(part)}
-                  >
-                    <CartIndicatorBadge quantity={cartQty} />
-
-                    {/* Content */}
-                    <div className="p-5">
-                      {part.category && (
-                        <span className="inline-block text-[11px] text-blue-600 bg-blue-50 font-semibold tracking-wide px-2.5 py-1 rounded-lg mb-2">{part.category}</span>
-                      )}
-
-                      <h3 className="font-bold text-gray-900 text-base leading-snug mb-1.5 line-clamp-2 group-hover:text-slate-900 transition-colors min-h-[3rem]">
-                        {part.name}
-                      </h3>
-
-                      <p className="text-xs font-mono text-gray-400 mb-3 tracking-tight">{part.partNumber}</p>
-
-                      {part.brand && (
-                        <div className="inline-block bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg mb-3 border border-slate-200/60">
-                          {part.brand}
-                        </div>
-                      )}
-
-                      {part.description && (
-                        <p className="text-xs text-gray-500 line-clamp-2 mb-4 leading-relaxed">{part.description}</p>
-                      )}
-
-                      <div className="flex items-end justify-between gap-2 mb-4 pt-2 border-t border-gray-100">
-                        <div className="mt-2">
-                          <span className="text-2xl font-extrabold text-slate-900">{part.price.toFixed(0)}</span>
-                          <span className="text-sm font-medium text-gray-400 mr-1">.{(part.price % 1).toFixed(2).slice(2)} ر.س</span>
-                        </div>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                          stockDisplay.color === 'green' ? 'text-emerald-700 bg-emerald-50' :
-                          stockDisplay.color === 'amber' ? 'text-amber-700 bg-amber-50' :
-                          'text-red-600 bg-red-50'
-                        }`}>
-                          {part.stock > 0 ? `${part.stock} متوفر` : 'نفذ'}
-                        </span>
-                      </div>
-
-                      {part.stock === 0 ? (
-                        <div className="bg-gray-50 text-gray-400 text-xs font-bold px-4 py-3 rounded-xl text-center border border-gray-200">
-                          نفذ المخزون
-                        </div>
-                      ) : cartQty > 0 ? (
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-between mb-2.5">
-                            <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                              </svg>
-                              في السلة
-                            </span>
-                            <span className="text-xs font-bold text-slate-700">{(part.price * cartQty).toFixed(2)} ر.س</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => updateQuantity(part.id, cartQty - 1)}
-                              className="w-11 h-11 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-gray-600 text-lg font-bold transition-all cursor-pointer active:scale-95"
-                            >
-                              −
-                            </button>
-                            <span className="flex-1 text-center font-extrabold text-slate-900 text-lg tabular-nums">{cartQty}</span>
-                            <button
-                              onClick={() => updateQuantity(part.id, cartQty + 1)}
-                              disabled={cartQty >= part.stock}
-                              className="w-11 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 flex items-center justify-center text-white text-lg font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleAddToCart(part); }}
-                          className="w-full py-3 bg-slate-900 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 text-white text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.97]"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                          </svg>
-                          أضف للسلة
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            view === 'table' ? (
+              <PartsTable
+                parts={filteredParts}
+                cartItems={items}
+                onAddToCart={handleAddToCart}
+                onUpdateQuantity={updateQuantity}
+                onSelect={setSelectedPart}
+              />
+            ) : (
+              <PartsCardGrid
+                parts={filteredParts}
+                cartItems={items}
+                onAddToCart={handleAddToCart}
+                onUpdateQuantity={updateQuantity}
+                onSelect={setSelectedPart}
+              />
+            )
           )}
 
           {/* Pagination */}

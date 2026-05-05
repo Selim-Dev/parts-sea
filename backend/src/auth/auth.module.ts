@@ -12,7 +12,7 @@ import { JwtStrategy } from './jwt.strategy.js';
     PassportModule,
     JwtModule.register({
       secret: 'spare-parts-secret-key',
-      signOptions: { expiresIn: '24h' },
+      signOptions: { expiresIn: '30d' },
     }),
   ],
   controllers: [AuthController],

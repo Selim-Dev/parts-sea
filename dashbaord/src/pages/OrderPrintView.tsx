@@ -58,9 +58,10 @@ export default function OrderPrintView() {
     );
   }
 
-  const total = order.items.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
-    0
+  const items = order.items ?? [];
+  const total = items.reduce(
+    (sum, item) => sum + (item.quantity ?? 0) * (item.unitPrice ?? 0),
+    0,
   );
 
   return (
@@ -139,14 +140,14 @@ export default function OrderPrintView() {
             </tr>
           </thead>
           <tbody>
-            {order.items.map((item) => (
-              <tr key={item.id}>
-                <td className="border border-gray-300 px-4 py-2">{item.partNumber}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.partName}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.quantity}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.unitPrice.toFixed(2)} ر.س</td>
+            {items.map((item, idx) => (
+              <tr key={item.id ?? idx}>
+                <td className="border border-gray-300 px-4 py-2">{item.partNumber ?? '—'}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.partName ?? '—'}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.quantity ?? 0}</td>
+                <td className="border border-gray-300 px-4 py-2">{(item.unitPrice ?? 0).toFixed(2)} ر.س</td>
                 <td className="border border-gray-300 px-4 py-2 font-medium">
-                  {(item.quantity * item.unitPrice).toFixed(2)} ر.س
+                  {((item.quantity ?? 0) * (item.unitPrice ?? 0)).toFixed(2)} ر.س
                 </td>
               </tr>
             ))}

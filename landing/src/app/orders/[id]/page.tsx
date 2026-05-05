@@ -63,9 +63,11 @@ export default function OrderDetailPage({
   }, [id]);
 
   const currentStepIndex = order ? statusSteps.indexOf(order.status) : -1;
-  const orderTotal = order
-    ? order.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-    : 0;
+  const orderItems = order?.items ?? [];
+  const orderTotal = orderItems.reduce(
+    (sum, item) => sum + (item.unitPrice ?? 0) * (item.quantity ?? 0),
+    0,
+  );
 
   return (
     <ProtectedRoute>
@@ -123,7 +125,7 @@ export default function OrderDetailPage({
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                       </svg>
-                      {order.items.length} قطعة
+                      {orderItems.length} قطعة
                     </div>
                   </div>
                 </div>
@@ -189,20 +191,20 @@ export default function OrderDetailPage({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {order.items.map((item) => (
-                        <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
+                      {orderItems.map((item, idx) => (
+                        <tr key={item.id ?? idx} className="hover:bg-blue-50/30 transition-colors">
                           <td className="px-5 py-4 font-mono text-xs text-gray-500 bg-gray-50/50">
-                            {item.partNumber}
+                            {item.partNumber ?? '—'}
                           </td>
-                          <td className="px-5 py-4 font-medium text-gray-900">{item.partName}</td>
+                          <td className="px-5 py-4 font-medium text-gray-900">{item.partName ?? '—'}</td>
                           <td className="px-5 py-4 text-center">
                             <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-medium">
-                              {item.quantity}
+                              {item.quantity ?? 0}
                             </span>
                           </td>
-                          <td className="px-5 py-4 text-gray-700">{item.unitPrice.toFixed(2)} ر.س</td>
+                          <td className="px-5 py-4 text-gray-700">{(item.unitPrice ?? 0).toFixed(2)} ر.س</td>
                           <td className="px-5 py-4 font-semibold text-gray-900">
-                            {(item.unitPrice * item.quantity).toFixed(2)} ر.س
+                            {((item.unitPrice ?? 0) * (item.quantity ?? 0)).toFixed(2)} ر.س
                           </td>
                         </tr>
                       ))}
